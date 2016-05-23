@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1464002807 source:e:\程序设计\大作业\train\dataprocessor.c
+	"dataProcessor.h"
+	"input.h"
+	<time.h>
+
+1464002807 e:\程序设计\大作业\train\dataprocessor.h
+	<windows.h>
+
+1464002807 e:\程序设计\大作业\train\input.h
+
+1464002807 source:e:\程序设计\大作业\train\input.c
+	<stdio.h>
+	"dataProcessor.h"
+	"input.h"
+	<string.h>
+	<windows.h>
+
+1464002663 source:e:\程序设计\大作业\train\main.c
+	<windows.h>
+	"input.h"
+	"output.h"
+	"dataProcessor.h"
+
+1464002410 e:\程序设计\大作业\train\output.h
+
+1464002677 source:e:\程序设计\大作业\train\output.c
+	"dataProcessor.h"
+	"input.h"
+	<stdio.h>
+	<time.h>
+	<windows.h>
+	"output.h"
+
