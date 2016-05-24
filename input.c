@@ -3,6 +3,7 @@
 #include "input.h"
 #include<string.h>
 #include<windows.h>
+extern HANDLE ThreadA;
 void CreateTrain (void)//设置火车的初始信息
 {
     FILE *fp;
@@ -73,6 +74,7 @@ void CreateTrain (void)//设置火车的初始信息
                 "公共轨道停留时间：%d\n火车状态：%s",trainC.speed,"逆时针",trainC.trackLen,trainC.position,trainC.time,trainC.restTime,"运行—公共轨道");
     fclose(fp);
 
+
 }
 
 
@@ -83,10 +85,10 @@ DWORD WINAPI ChangeInformation(LPVOID lpParameter)
     {
         //WaitForSingleObject(hMutex1,INFINITE);
         //WaitForSingleObject(hMutex2,INFINITE);
-
         printf("输入”PA“让小火车暂停，输入”SA“让火车再次启动\n");
-        printf("输入”PB“让小火车暂停，输入”SB“让火车再次启动\n");
-        printf("输入”PC“让小火车暂停，输入”SC“让火车再次启动\n");
+    printf("输入”PB“让小火车暂停，输入”SB“让火车再次启动\n");
+    printf("输入”PC“让小火车暂停，输入”SC“让火车再次启动\n");
+
         scanf("%s",string1);
         if(strcmp(string1,"PA")==0)
             trainA.state=3;
@@ -100,7 +102,7 @@ DWORD WINAPI ChangeInformation(LPVOID lpParameter)
             trainB.state=1;
         else if(strcmp(string1,"SC")==0)
             trainC.state=1;
-        else printf("输入的是非法信息");
+        //else printf("输入的是非法信息");
         //ReleaseMutex(hMutex1);
         //ReleaseMutex(hMutex2);
     }
@@ -108,10 +110,11 @@ DWORD WINAPI ChangeInformation(LPVOID lpParameter)
 
 char JudgePass(void)
 {
-    printf("请输入优先通过的小火车：");
     char trainNum;
+    SuspendThread(ThreadA);
+    printf("请输入优先通过的小火车：");
     scanf("%c",&trainNum);
-    getchar();
+    ResumeThread(ThreadA);
     return trainNum;
 }
 

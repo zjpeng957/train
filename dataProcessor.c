@@ -1,10 +1,15 @@
 #include "dataProcessor.h"
 #include "input.h"
+#include "output.h"
+#include<stdio.h>
 #include<time.h>
 
 //extern HANDLE hMutex2,hMutex3;
+Train trainA={SPEED,POSITION,TIME,CLWISE,TRACKLEN,TIME,S1,0},
+      trainB={SPEED,POSITION,TIME,ANTICLWISE,TRACKLEN,TIME,S1,0},
+      trainC={SPEED,POSITION,TIME,CLWISE,TRACKLEN,TIME,S1,0};
 
-Train trainA,trainB,trainC;
+
 //分别代表公共轨道的起点和终点
 int a1_in=7,a1_out=10,a2_in=11,a2_out=14,b_in=19,b_out=16,c_in=2,c_out=5;
 
@@ -46,80 +51,122 @@ DWORD WINAPI run(LPVOID lpParameter)
     while(1)
     {
         //WaitForSingleObject(hMutex1,INFINITE);
-        switch(trainA.state)
+        if(trainA.time!=0)
+            trainA.time--;
+        else
         {
-            case S1:move(&trainA);
-                    if(trainA.position-(a1_in-trainA.direction*trainA.speed)<=0) trainA.detected=1,trainA.state=S2;
-                    else if(trainA.position-(a2_in-trainA.direction*trainA.speed)<=0) trainA.detected=2,trainA.state=S2;
-                    break;
-            case S2:move(&trainA);
-                    if(trainA.direction==CLWISE)
-                        if(trainA.detected==1)
-                            if(trainA.position>(a1_in+a1_out)/2&&ai==0) trainA.position=(a1_in+a1_out)/2,trainA.state=S4;
-                            else if(trainA.position>=a1_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
+            switch(trainA.state)
+            {
+                case S1:move(&trainA);
+                        if((trainA.direction*(a1_in-trainA.position)+24)%24<=trainA.speed)
+                                trainA.detected=1,trainA.state=S2;
+                        else if((trainA.direction*(a2_in-trainA.position)+24)%24<=trainA.speed)
+                                trainA.detected=2,trainA.state=S2;
+                        //if(trainA.position-(a1_in-trainA.direction*trainA.speed)<=0) trainA.detected=1,trainA.state=S2;
+                        //else if(trainA.position-(a2_in-trainA.direction*trainA.speed)<=0) trainA.detected=2,trainA.state=S2;
+                        break;
+                case S2:move(&trainA);
+                        if(trainA.direction==CLWISE)
+                            {
+                                if(trainA.detected==1)
+                                    {
+                                        if(trainA.position>(a1_in+a1_out)/2&&ai==0) trainA.position=(a1_in+a1_out)/2,trainA.state=S4;
+                                        else if(trainA.position>=a1_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
+                                    }
+                                else if(trainA.detected==2)
+                                    {
+                                        if(trainA.position>(a2_in+a2_out)/2&&ai==0) trainA.position=(a2_in+a2_out)/2,trainA.state=S4;
+                                        else if(trainA.position>=a2_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
+                                    }
+                            }
+                        if(trainA.direction==ANTICLWISE)
+                            {
+                                if(trainA.detected==1)
+                                    {
+                                        if(trainA.position<(a1_in+a1_out)/2&&ai==0) trainA.position=(a1_in+a1_out)/2,trainA.state=S4;
+                                        else if(trainA.position<=a1_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
+                                    }
+                                if(trainA.detected==2)
+                                    {
+                                        if(trainA.position<(a1_in+a1_out)/2&&ai==0) trainA.position=(a1_in+a1_out)/2,trainA.state=S4;
+                                        else if(trainA.position<=a2_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
+                                    }
+                            }
+
+                        break;
+                case S3:break;
+                case S4:ai++;
+                        if(ai>=trainA.restTime) trainA.state=S2;
+                        break;
+                case S5:if(trainA.detected==1)
+                            if(trainB.state!=S2&&trainB.state!=S4) trainA.state=S2;
                         if(trainA.detected==2)
-                            if(trainA.position>(a2_in+a2_out)/2&&ai==0) trainA.position=(a2_in+a2_out)/2,trainA.state=S4;
-                            else if(trainA.position>=a2_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
-                    if(trainA.direction==ANTICLWISE)
-                        if(trainA.detected==1)
-                            if(trainA.position<(a1_in+a1_out)/2&&ai==0) trainA.position=(a1_in+a1_out)/2,trainA.state=S4;
-                            else if(trainA.position<=a1_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
-                        if(trainA.detected==2)
-                            if(trainA.position<(a1_in+a1_out)/2&&ai==0) trainA.position=(a1_in+a1_out)/2,trainA.state=S4;
-                            else if(trainA.position<=a2_out&&ai!=0) trainA.detected=0,ai=0,trainA.state=S1;
-                    break;
-            case S3:break;
-            case S4:ai++;
-                    if(ai>=trainA.restTime) trainA.state=S2;
-                    break;
-            case S5:if(trainA.detected==1)
-                        if(trainB.state!=S2&&trainB.state!=S4) trainA.state=S2;
-                    if(trainA.detected==2)
-                        if(trainC.state!=S2&&trainC.state!=S4) trainA.state=S2;
-                    break;
+                            if(trainC.state!=S2&&trainC.state!=S4) trainA.state=S2;
+                        break;
+            }
         }
-        switch(trainB.state)
+        if(trainB.time!=0)
+            trainB.time--;
+        else
         {
-            case S1:move(&trainB);
-                    if(trainB.position-(b_in-trainB.direction*trainB.speed)<=0) trainB.detected=1,trainB.state=S2;
-                    break;
-            case S2:move(&trainB);
-                    if(trainB.direction==CLWISE)
-                            if(trainB.position>(b_in+b_out)/2&&bi==0) trainB.position=(b_in+b_out)/2,trainB.state=S4;
-                            else if(trainB.position>=b_out&&bi!=0) trainB.detected=0,bi=0,trainB.state=S1;
-                    if(trainB.direction==ANTICLWISE)
-                            if(trainB.position<(b_in+b_out)/2&&bi==0) trainB.position=(b_in+b_out)/2,trainB.state=S4;
-                            else if(trainB.position<=b_out&&bi!=0) trainB.detected=0,bi=0,trainB.state=S1;
-                    break;
-            case S3:break;
-            case S4:bi++;
-                    if(bi>=trainB.restTime) trainB.state=S2;
-                    break;
-            case S5:if(trainA.state!=S2&&trainA.state!=S4) trainB.state=S2;
-                    break;
+            switch(trainB.state)
+            {
+                case S1:move(&trainB);
+                        if((trainB.direction*(b_in-trainB.position)+24)%24<=trainB.speed)
+                                trainB.detected=1,trainB.state=S2;
+                        break;
+                case S2:move(&trainB);
+                        if(trainB.direction==CLWISE)
+                                {
+                                    if(trainB.position>(b_in+b_out)/2&&bi==0) trainB.position=(b_in+b_out)/2,trainB.state=S4;
+                                    else if(trainB.position>=b_out&&bi!=0) trainB.detected=0,bi=0,trainB.state=S1;
+                                }
+                        else
+                                {
+                                    if(trainB.position<(b_in+b_out)/2&&bi==0) trainB.position=(b_in+b_out)/2,trainB.state=S4;
+                                    else if(trainB.position<=b_out&&bi!=0) trainB.detected=0,bi=0,trainB.state=S1;
+                                }
+                        break;
+                case S3:break;
+                case S4:bi++;
+                        if(bi>=trainB.restTime) trainB.state=S2;
+                        break;
+                case S5:if(trainA.state!=S2&&trainA.state!=S4) trainB.state=S2;
+                        break;
+            }
         }
-        switch(trainC.state)
+        if(trainC.time!=0)
+            trainC.time--;
+        else
         {
-            case S1:move(&trainC);
-                    if(trainC.position-(c_in-trainC.direction*trainC.speed)<=0) trainC.detected=1,trainC.state=S2;
-                    break;
-            case S2:move(&trainC);
-                    if(trainC.direction==CLWISE)
-                            if(trainC.position>(c_in+c_out)/2&&ci==0) trainC.position=(c_in+c_out)/2,trainC.state=S4;
-                            else if(trainC.position>=c_out&&ci!=0) trainC.detected=0,ci=0,trainC.state=S1;
-                    if(trainC.direction==ANTICLWISE)
-                            if(trainC.position<(c_in+c_out)/2&&ci==0) trainC.position=(c_in+c_out)/2,trainC.state=S4;
-                            else if(trainC.position<=c_out&&ci!=0) trainC.detected=0,ci=0,trainC.state=S1;
-                    break;
-            case S3:break;
-            case S4:ci++;
-                    if(ci>=trainC.restTime) trainC.state=S2;
-                    break;
-            case S5:if(trainA.state!=S2&&trainA.state!=S4) trainC.state=S2;
-                    break;
+            switch(trainC.state)
+            {
+                case S1:move(&trainC);
+                        if((trainC.direction*(c_in-trainC.position)+24)%24<=trainC.speed)
+                                trainC.detected=1,trainC.state=S2;
+                        break;
+                case S2:move(&trainC);
+                        if(trainC.direction==CLWISE)
+                                {
+                                    if(trainC.position>(c_in+c_out)/2&&ci==0) trainC.position=(c_in+c_out)/2,trainC.state=S4;
+                                    else if(trainC.position>=c_out&&ci!=0) trainC.detected=0,ci=0,trainC.state=S1;
+                                }
+                        else
+                                {
+                                    if(trainC.position<(c_in+c_out)/2&&ci==0) trainC.position=(c_in+c_out)/2,trainC.state=S4;
+                                    else if(trainC.position<=c_out&&ci!=0) trainC.detected=0,ci=0,trainC.state=S1;
+                                }
+                        break;
+                case S3:break;
+                case S4:ci++;
+                        if(ci>=trainC.restTime) trainC.state=S2;
+                        break;
+                case S5:if(trainA.state!=S2&&trainA.state!=S4) trainC.state=S2;
+                        break;
+            }
         }
         timeout(1);
-        if(++i%3==0) Output_iformation();
+        /*if(++i%3==0)*/ Output_information();
         judge();
         //ReleaseMutex(hMutex1);
     }
@@ -136,6 +183,7 @@ void judge(void)
         if(trainA.detected==1&&trainB.detected)
         {
 
+            printf("小火车A和B即将进入公共轨道，");
             //WaitForSingleObject(hMutex3,INFINITE);
             //WaitForSingleObject(hMutex2,INFINITE);
             train=JudgePass();
@@ -157,9 +205,11 @@ void judge(void)
                 trainA.state=trainA.speed>=trainB.speed?S2:S5;
                 trainB.state=trainA.speed>=trainB.speed?S5:S2;
             }
+            trainB.detected=0;
         }
         else if(trainA.detected==2&&trainC.detected)
         {
+            printf("小火车A和C即将进入公共轨道，");
             //WaitForSingleObject(hMutex3,INFINITE);
             //WaitForSingleObject(hMutex2,INFINITE);
             train=JudgePass();
@@ -181,6 +231,7 @@ void judge(void)
                 trainA.state=trainA.speed>=trainC.speed?S2:S5;
                 trainC.state=trainA.speed>=trainC.speed?S5:S2;
             }
+            trainC.detected=0;
         }
         else if((trainA.detected==1&&!trainB.detected)||(trainA.detected==2&&!trainC.detected)) trainA.state=S2;
         else if(!trainA.detected==1&&trainB.detected) trainB.state=S2;

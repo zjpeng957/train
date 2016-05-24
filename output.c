@@ -5,7 +5,7 @@
 #include<windows.h>
 #include"output.h"
 //extern HANDLE hMutex3;
-void Output_iformation(void)
+void Output_information(void)
 {
     int runTime;
 	//while(1)

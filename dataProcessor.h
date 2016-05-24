@@ -3,7 +3,7 @@
 
 #include<windows.h>
 //火车配置的默认参数
-#define SPEED 3//火车默认速度
+#define SPEED 1//火车默认速度
 #define POSITION 0//默认启动位置
 #define TIME 0//默认启动时间
 #define CLWISE 1//顺时针（默认）
