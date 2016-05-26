@@ -75,6 +75,7 @@ void CreateTrain (void)//设置火车的初始信息
     fclose(fp);
 
 
+
 }
 
 
@@ -86,8 +87,8 @@ DWORD WINAPI ChangeInformation(LPVOID lpParameter)
         //WaitForSingleObject(hMutex1,INFINITE);
         //WaitForSingleObject(hMutex2,INFINITE);
         printf("输入”PA“让小火车暂停，输入”SA“让火车再次启动\n");
-    printf("输入”PB“让小火车暂停，输入”SB“让火车再次启动\n");
-    printf("输入”PC“让小火车暂停，输入”SC“让火车再次启动\n");
+        printf("输入”PB“让小火车暂停，输入”SB“让火车再次启动\n");
+        printf("输入”PC“让小火车暂停，输入”SC“让火车再次启动\n");
 
         scanf("%s",string1);
         if(strcmp(string1,"PA")==0)
@@ -111,10 +112,10 @@ DWORD WINAPI ChangeInformation(LPVOID lpParameter)
 char JudgePass(void)
 {
     char trainNum;
-    SuspendThread(ThreadA);
+    //SuspendThread(ThreadA);
     printf("请输入优先通过的小火车：");
     scanf("%c",&trainNum);
-    ResumeThread(ThreadA);
+    //ResumeThread(ThreadA);
     return trainNum;
 }
 

@@ -5,6 +5,14 @@
 #include<windows.h>
 #include"output.h"
 //extern HANDLE hMutex3;
+void Count_time(char NaMe,int count_time)
+{
+	FILE *output;
+	output=fopen("output.txt","a+");
+	fprintf(output,"距离%c重新启动还有%d秒\n",NaMe,count_time);
+	printf("距离%c重新启动还有%d秒\n",NaMe,count_time);
+	fclose(output);
+}
 void Output_information(void)
 {
     int runTime;
